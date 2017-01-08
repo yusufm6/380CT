@@ -1,7 +1,9 @@
-from random import randint, sample
+from random import randint, sample, shuffle
 import random
+from itertools import chain, combinations
 import itertools
 from time import time
+import timeit
 import math
 import sys
 #pip install numpy on pip folder from the python folder (shift right click to open command prompt)
@@ -94,11 +96,7 @@ class SSP():
                 return math.exp((old-new)/temp)
         else:
             return 0
-    def GRASP(self, max_iter):
-         best_candidate = 0
-         while (i <=  max_iter):
-             greedy_candidate = GreedyAlgorithm()
-             grasp_candidate = LocalSearch(greedy_candidate)
+    
     def local_search(self,greedy_set):
         candidate = []
         for i in range(0, self.n):
@@ -163,7 +161,32 @@ class SSP():
             else:
                 print(total-self.t)
                 break
+            print "Greedy: " +str(subsets)
         # print ("Greedy: " +str(subsets))
+        return subsets
+    def GRASP(self, n, bitlength=10):
+        """
+        Greedy algorithm for SSP
+        Randomized
+        """
+        total = 0
+        subsets = []
+        block_size = 8
+
+        for i in range(0, len(self.S), block_size):
+            tmp = self.S[i:i+block_size]
+            shuffle(tmp)
+            self.S[i:i+block_size] = tmp
+            
+        shuffle(self.S)
+
+        for j in range(0, len(self.S)):
+            if (sum(subsets) + self.S[j] <= self.t):
+                subsets.append(self.S[j])
+                total = total + self.S[j]
+            else:
+                print "Distance: ", self.t - total
+                break
         return subsets
     #function to generate all the subsets of the initial set
     def getSubsets(self):
@@ -189,3 +212,25 @@ if (instance.dynamic_programming() == True):
     print("Solution Found")
 else:
     print("No Solution Found")
+def average(sets):
+    return sum(sets) / float(len(sets))
+
+result = []
+runtime = 5
+setsize = 24
+
+for i in range(0, runtime):
+    instance.random_yes_instance(setsize)
+    print instance
+
+    start = timeit.default_timer()
+    print instance.GRASP(setsize)
+
+    stop = timeit.default_timer()
+    result.append(10 * (stop - start)) # in seconds
+
+print "Average run time for %d integers ran %d times: " % (setsize, runtime), average(result), "(sec)"
+
+    
+    
+    
